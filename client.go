@@ -11,6 +11,10 @@ type FileTransportClient struct {
 	path string
 }
 
+const (
+	fixedBlockSize = 1024
+)
+
 func NewFileTransportClient(path string) *FileTransportClient {
 	return &FileTransportClient{
 		path: path,
@@ -35,7 +39,7 @@ func (c *FileTransportClient) request(ip, port string) error {
 	}
 
 	// 3. 读取文件内容并发送
-	buf := make([]byte, 1024)
+	buf := make([]byte, fixedBlockSize)
 	for {
 		n, err := file.Read(buf)
 		if err != nil {

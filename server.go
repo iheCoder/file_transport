@@ -48,6 +48,7 @@ func (s *FileTransportServer) handleConn(conn net.Conn) {
 		fmt.Println("os.Create err:", err)
 		return
 	}
+	defer file.Close()
 
 	// 读取客户端发送的数据
 	buf := make([]byte, 1024)
