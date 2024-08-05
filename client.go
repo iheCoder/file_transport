@@ -58,7 +58,13 @@ func (c *FileTransportClient) sendData(conn net.Conn, handle *dataHandler) error
 			break
 		}
 
-		_, err := conn.Write(bd.raw)
+		bytes, err := MarshallTransportModel(bd)
+		if err != nil {
+			fmt.Println("json.Marshal err:", err)
+			return err
+		}
+
+		_, err = conn.Write(bytes)
 		if err != nil {
 			fmt.Println("conn.Write err:", err)
 			return err

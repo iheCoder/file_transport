@@ -25,8 +25,15 @@ func (b *bitmap) IsSet(index int) bool {
 }
 
 func (b *bitmap) IsAllSet() bool {
-	for _, v := range b.data {
-		if v != 0xff {
+	var i int
+	for i = 0; i < len(b.data)-1; i++ {
+		if b.data[i] != 0xff {
+			return false
+		}
+	}
+
+	for j := 0; j < b.size%8; j++ {
+		if b.data[i]&(1<<uint(j)) == 0 {
 			return false
 		}
 	}

@@ -1,5 +1,12 @@
 package file_tranport
 
+import (
+	"encoding/json"
+)
+
+// TODO: change into real count
+var blockCount = 19
+
 type dataHandler struct {
 	blockSize int
 	bds       []blockData
@@ -7,17 +14,26 @@ type dataHandler struct {
 }
 
 type blockData struct {
-	raw   []byte
-	index int
+	Raw   []byte `json:"raw"`
+	Index int    `json:"index"`
+}
+
+func newBlockData(raw []byte) (*blockData, error) {
+	var bd blockData
+	err := json.Unmarshal(raw, &bd)
+	if err != nil {
+		return nil, err
+	}
+	return &bd, nil
 }
 
 func newClientDataHandler(data []byte, blockSize int) *dataHandler {
-	blockCount := (len(data) + blockSize - 1) / blockSize
+	blockCount = (len(data) + blockSize - 1) / blockSize
 	bds := make([]blockData, blockCount)
 	for i := 0; i < blockCount; i++ {
 		bds[i] = blockData{
-			raw:   data[i*blockSize : min((i+1)*blockSize, len(data))],
-			index: i,
+			Raw:   data[i*blockSize : min((i+1)*blockSize, len(data))],
+			Index: i,
 		}
 	}
 
@@ -54,14 +70,14 @@ func newServerDataHandler(blockCount int) *dataHandler {
 }
 
 func (d *dataHandler) WriteBlock(bd *blockData) {
-	d.bds[bd.index] = *bd
-	d.pb.Set(bd.index)
+	d.bds[bd.Index] = *bd
+	d.pb.Set(bd.Index)
 }
 
 func (d *dataHandler) CombinedOne() []byte {
 	total := make([]byte, 0)
 	for _, bd := range d.bds {
-		total = append(total, bd.raw...)
+		total = append(total, bd.Raw...)
 	}
 	return total
 }

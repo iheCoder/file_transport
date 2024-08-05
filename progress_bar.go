@@ -18,6 +18,8 @@ func NewProgressBar(total int) *progressBar {
 		total:  total,
 		bm:     NewBitmap(total),
 		rwlock: sync.RWMutex{},
+		// The initial value of completedIndex is -1, which means no task has been completed.
+		completedIndex: -1,
 	}
 }
 

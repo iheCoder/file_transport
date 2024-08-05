@@ -50,26 +50,55 @@ func (s *FileTransportServer) handleConn(conn net.Conn) {
 	}
 	defer file.Close()
 
-	// 读取客户端发送的数据
-	buf := make([]byte, 1024)
+	// 创建数据处理器
+	handler := newServerDataHandler(blockCount)
 
+	// 读取客户端发送的数据
+	data, err := s.receiveData(conn, handler)
+	if err != nil {
+		fmt.Println("receiveData err:", err)
+		return
+	}
+
+	// 写入文件
+	_, err = file.Write(data)
+	if err != nil {
+		fmt.Println("file.Write err:", err)
+		return
+	}
+
+	fmt.Println("文件接收完毕")
+}
+
+func (s *FileTransportServer) receiveData(conn net.Conn, handler *dataHandler) ([]byte, error) {
 	for {
+		size, err := GetDataSizeFromConn(conn)
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			return nil, err
+		}
+
+		buf := make([]byte, size)
 		n, err := conn.Read(buf)
 		if err != nil {
 			if err == io.EOF {
 				break
 			}
-			fmt.Println("conn.Read err:", err)
-			return
+			return nil, err
 		}
 
-		// 写入文件
-		_, err = file.Write(buf[:n])
+		block, err := newBlockData(buf[:n])
 		if err != nil {
-			fmt.Println("file.Write err:", err)
-			return
+			return nil, err
 		}
+		handler.WriteBlock(block)
 	}
 
-	fmt.Println("文件接收完毕")
+	if !handler.IsAllBlockCompleted() {
+		return nil, errDataBroken
+	}
+
+	return handler.CombinedOne(), nil
 }
