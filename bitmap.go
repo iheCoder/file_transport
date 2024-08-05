@@ -23,3 +23,12 @@ func (b *bitmap) Unset(index int) {
 func (b *bitmap) IsSet(index int) bool {
 	return b.data[index/8]&(1<<uint(index%8)) != 0
 }
+
+func (b *bitmap) IsAllSet() bool {
+	for _, v := range b.data {
+		if v != 0xff {
+			return false
+		}
+	}
+	return true
+}
