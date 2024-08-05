@@ -38,19 +38,27 @@ func (c *FileTransportClient) request(ip, port string) error {
 		return err
 	}
 
+	// 3. 读取所有数据，并构建数据处理器
+	// TODO: 由于数据可能会很大，所以这里不适合一次性读取所有数据
+	data, err := io.ReadAll(file)
+	if err != nil {
+		fmt.Println("io.ReadAll err:", err)
+		return err
+	}
+	handler := newClientDataHandler(data, fixedBlockSize)
+
 	// 3. 读取文件内容并发送
-	buf := make([]byte, fixedBlockSize)
+	return c.sendData(conn, handler)
+}
+
+func (c *FileTransportClient) sendData(conn net.Conn, handle *dataHandler) error {
 	for {
-		n, err := file.Read(buf)
-		if err != nil {
-			if err == io.EOF {
-				break
-			}
-			fmt.Println("file.Read err:", err)
-			return err
+		ok, bd := handle.ReadNextBlock()
+		if !ok {
+			break
 		}
 
-		_, err = conn.Write(buf[:n])
+		_, err := conn.Write(bd.raw)
 		if err != nil {
 			fmt.Println("conn.Write err:", err)
 			return err

@@ -58,7 +58,7 @@ func (d *dataHandler) WriteBlock(bd *blockData) {
 	d.pb.Set(bd.index)
 }
 
-func (d *dataHandler) ConstructTotal() []byte {
+func (d *dataHandler) CombinedOne() []byte {
 	total := make([]byte, 0)
 	for _, bd := range d.bds {
 		total = append(total, bd.raw...)
