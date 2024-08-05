@@ -1,6 +1,9 @@
 package file_tranport
 
-import "testing"
+import (
+	"testing"
+	"time"
+)
 
 func TestSimpleServer(t *testing.T) {
 	server := NewFileTransportServer("testdata")
@@ -15,4 +18,6 @@ func TestSimpleServer(t *testing.T) {
 	}
 
 	t.Log("client request done")
+
+	time.Sleep(10 * time.Second)
 }
