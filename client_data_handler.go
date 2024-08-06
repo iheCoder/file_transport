@@ -70,11 +70,24 @@ func newClientFileDataHandler(path string, blockSize int) (*dataHandler, error) 
 	}
 
 	blockCount := calculateBlockCount(fh.Size(), blockSize)
+
+	// init block data
+	// no need to fill raw data, because it will be filled when read
+	bds := make([]blockData, blockCount)
+	for i := 0; i < blockCount; i++ {
+		bds[i] = blockData{
+			Index:     i,
+			Count:     blockCount,
+			BlockSize: blockSize,
+		}
+	}
+
 	return &dataHandler{
 		blockSize: blockSize,
 		fh:        fh,
 		pb:        NewProgressBar(blockCount),
 		mode:      fileMode,
+		bds:       bds,
 	}, nil
 }
 

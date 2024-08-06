@@ -13,17 +13,16 @@ var (
 	maxTransportSecondsPerBlock = 10
 )
 
-func newTransportAdviser(bandwidth float64, totalSize, blockTransportMS int) *transportAdviser {
+func newTransportAdviser(bandwidth float64, blockTransportMS int) *transportAdviser {
 	return &transportAdviser{
 		bandwidth:        bandwidth,
-		totalSize:        totalSize,
 		blockTransportMS: blockTransportMS,
 	}
 }
 
 func (t *transportAdviser) GoodBlockSize() int {
 	maxBlockSize := int(t.bandwidth * float64(t.blockTransportMS) / 1000)
-	if maxBlockSize > t.totalSize {
+	if maxBlockSize > t.totalSize && t.totalSize > 0 {
 		return t.totalSize
 	}
 
@@ -31,7 +30,8 @@ func (t *transportAdviser) GoodBlockSize() int {
 	return maxBlockSize * 8 / 10
 }
 
-func (t *transportAdviser) UpdateTotalSize(total int) {
+// updateTotalSize update total size before file transport
+func (t *transportAdviser) updateTotalSize(total int) {
 	t.totalSize = total
 }
 
@@ -45,6 +45,9 @@ func (t *transportAdviser) GetClientDataHandler(path string) (*dataHandler, erro
 	if err != nil {
 		return nil, err
 	}
+
+	// update total size
+	t.updateTotalSize(size)
 
 	// get good block size
 	blockSize := t.GoodBlockSize()

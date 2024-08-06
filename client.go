@@ -5,8 +5,14 @@ import (
 	"net"
 )
 
+var (
+	defaultBandWidth        = 1024
+	defaultBlockTransportMS = 1000
+)
+
 type FileTransportClient struct {
-	path string
+	path    string
+	adviser *transportAdviser
 }
 
 const (
@@ -15,7 +21,8 @@ const (
 
 func NewFileTransportClient(path string) *FileTransportClient {
 	return &FileTransportClient{
-		path: path,
+		path:    path,
+		adviser: newTransportAdviser(float64(defaultBandWidth), defaultBlockTransportMS),
 	}
 }
 
@@ -30,10 +37,9 @@ func (c *FileTransportClient) request(ip, port string) error {
 	defer conn.Close()
 
 	// 3. 读取所有数据，并构建数据处理器
-	// TODO: 由于数据可能会很大，所以这里不适合一次性读取所有数据
-	handler, err := newClientMemDataHandler(c.path, fixedBlockSize)
+	handler, err := c.adviser.GetClientDataHandler(c.path)
 	if err != nil {
-		fmt.Println("newClientMemDataHandler err:", err)
+		fmt.Println("GetClientDataHandler err:", err)
 		return err
 	}
 
