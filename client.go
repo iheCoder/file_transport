@@ -45,7 +45,11 @@ func (c *FileTransportClient) request(ip, port string) error {
 		fmt.Println("io.ReadAll err:", err)
 		return err
 	}
-	handler := newClientDataHandler(data, fixedBlockSize)
+	handler, err := newClientMemDataHandler(c.path, data, fixedBlockSize)
+	if err != nil {
+		fmt.Println("newClientMemDataHandler err:", err)
+		return err
+	}
 
 	// 3. 读取文件内容并发送
 	return c.sendData(conn, handler)
@@ -53,7 +57,7 @@ func (c *FileTransportClient) request(ip, port string) error {
 
 func (c *FileTransportClient) sendData(conn net.Conn, handle *dataHandler) error {
 	for {
-		ok, bd := handle.ReadNextBlock()
+		ok, bd, _ := handle.ReadNextBlock()
 		if !ok {
 			break
 		}

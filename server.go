@@ -93,7 +93,9 @@ func (s *FileTransportServer) receiveData(conn net.Conn, handler *dataHandler) (
 		if err != nil {
 			return nil, err
 		}
-		handler.WriteBlock(block)
+		if err = handler.WriteBlock(block); err != nil {
+			return nil, err
+		}
 	}
 
 	if !handler.IsAllBlockCompleted() {
