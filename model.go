@@ -34,7 +34,8 @@ func int32ToBytes(n uint32) []byte {
 }
 
 type blockData struct {
-	Raw   []byte `json:"raw"`
-	Index int    `json:"index"`
-	Count int    `json:"count"`
+	Raw       []byte `json:"raw"`
+	Index     int    `json:"index"`
+	Count     int    `json:"count"`
+	BlockSize int    `json:"blockSize"`
 }

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"net"
-	"os"
 	"path/filepath"
 )
 
@@ -43,41 +42,39 @@ func (s *FileTransportServer) handleConn(conn net.Conn) {
 	defer conn.Close()
 
 	// 创建接收文件
-	file, err := os.Create(filepath.Join(s.downloadDir, "server_test.txt"))
-	if err != nil {
-		fmt.Println("os.Create err:", err)
-		return
-	}
-	defer file.Close()
+	path := filepath.Join(s.downloadDir, "server_test.txt")
 
 	// 创建数据处理器
-	handler := newServerDataHandler()
+	handler, err := newServerDataHandler(path)
+	if err != nil {
+		fmt.Println("newServerDataHandler err:", err)
+		return
+	}
 
 	// 读取客户端发送的数据
-	data, err := s.receiveData(conn, handler)
+	err = s.receiveData(conn, handler)
 	if err != nil {
 		fmt.Println("receiveData err:", err)
 		return
 	}
 
-	// 写入文件
-	_, err = file.Write(data)
-	if err != nil {
-		fmt.Println("file.Write err:", err)
+	// 持久化
+	if err = handler.Persist(); err != nil {
+		fmt.Println("handler.Persist err:", err)
 		return
 	}
 
 	fmt.Println("文件接收完毕")
 }
 
-func (s *FileTransportServer) receiveData(conn net.Conn, handler *dataHandler) ([]byte, error) {
+func (s *FileTransportServer) receiveData(conn net.Conn, handler *dataHandler) error {
 	for {
 		size, err := GetDataSizeFromConn(conn)
 		if err != nil {
 			if err == io.EOF {
 				break
 			}
-			return nil, err
+			return err
 		}
 
 		buf := make([]byte, size)
@@ -86,21 +83,21 @@ func (s *FileTransportServer) receiveData(conn net.Conn, handler *dataHandler) (
 			if err == io.EOF {
 				break
 			}
-			return nil, err
+			return err
 		}
 
 		block, err := newBlockData(buf[:n])
 		if err != nil {
-			return nil, err
+			return err
 		}
 		if err = handler.WriteBlock(block); err != nil {
-			return nil, err
+			return err
 		}
 	}
 
 	if !handler.IsAllBlockCompleted() {
-		return nil, errDataBroken
+		return errDataBroken
 	}
 
-	return handler.CombinedOne(), nil
+	return nil
 }

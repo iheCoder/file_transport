@@ -8,8 +8,8 @@ type fileHelper struct {
 	fileSize  int
 }
 
-// NewFileHelper create a new file helper
-func NewFileHelper(path string, blockSize int) (*fileHelper, error) {
+// NewFileReaderHelper create a new file helper
+func NewFileReaderHelper(path string, blockSize int) (*fileHelper, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -29,13 +29,8 @@ func NewFileHelper(path string, blockSize int) (*fileHelper, error) {
 }
 
 // Size get file size
-func (f *fileHelper) Size() (int, error) {
-	stat, err := f.f.Stat()
-	if err != nil {
-		return 0, err
-	}
-
-	return int(stat.Size()), nil
+func (f *fileHelper) Size() int {
+	return f.fileSize
 }
 
 // ReadBlock read block from file
@@ -54,16 +49,14 @@ func (f *fileHelper) ReadBlock(index int) ([]byte, error) {
 	return raw[:n], nil
 }
 
-// WriteBlock write block to file
-func (f *fileHelper) WriteBlock(index int, raw []byte) error {
-	_, err := f.f.Seek(int64(index*f.blockSize), 0)
-	if err != nil {
-		return err
-	}
+// Close close file
+func (f *fileHelper) Close() error {
+	return f.f.Close()
+}
 
-	_, err = f.f.Write(raw)
-	if err != nil {
-		return err
-	}
-	return nil
+// ReadAll read all data from file
+func (f *fileHelper) ReadAll() ([]byte, error) {
+	data := make([]byte, f.fileSize)
+	_, err := f.f.Read(data)
+	return data, err
 }
