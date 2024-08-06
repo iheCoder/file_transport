@@ -28,6 +28,14 @@ func NewFileReaderHelper(path string, blockSize int) (*fileHelper, error) {
 	}, nil
 }
 
+func GetFileSize(path string) (int, error) {
+	stat, err := os.Stat(path)
+	if err != nil {
+		return 0, err
+	}
+	return int(stat.Size()), nil
+}
+
 // Size get file size
 func (f *fileHelper) Size() int {
 	return f.fileSize
