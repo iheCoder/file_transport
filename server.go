@@ -51,7 +51,7 @@ func (s *FileTransportServer) handleConn(conn net.Conn) {
 	defer file.Close()
 
 	// 创建数据处理器
-	handler := newServerDataHandler(blockCount)
+	handler := newServerDataHandler()
 
 	// 读取客户端发送的数据
 	data, err := s.receiveData(conn, handler)

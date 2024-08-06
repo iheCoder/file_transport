@@ -32,3 +32,9 @@ func int32ToBytes(n uint32) []byte {
 	binary.BigEndian.PutUint32(bytes, n)
 	return bytes
 }
+
+type blockData struct {
+	Raw   []byte `json:"raw"`
+	Index int    `json:"index"`
+	Count int    `json:"count"`
+}

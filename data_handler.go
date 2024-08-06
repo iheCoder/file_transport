@@ -4,18 +4,13 @@ import (
 	"encoding/json"
 )
 
-// TODO: change into real count
-var blockCount = 19
-
 type dataHandler struct {
 	blockSize int
 	bds       []blockData
 	pb        *progressBar
-}
 
-type blockData struct {
-	Raw   []byte `json:"raw"`
-	Index int    `json:"index"`
+	// for server
+	initialized bool
 }
 
 func newBlockData(raw []byte) (*blockData, error) {
@@ -28,12 +23,13 @@ func newBlockData(raw []byte) (*blockData, error) {
 }
 
 func newClientDataHandler(data []byte, blockSize int) *dataHandler {
-	blockCount = (len(data) + blockSize - 1) / blockSize
+	blockCount := (len(data) + blockSize - 1) / blockSize
 	bds := make([]blockData, blockCount)
 	for i := 0; i < blockCount; i++ {
 		bds[i] = blockData{
 			Raw:   data[i*blockSize : min((i+1)*blockSize, len(data))],
 			Index: i,
+			Count: blockCount,
 		}
 	}
 
@@ -62,14 +58,21 @@ func (d *dataHandler) IsAllBlockCompleted() bool {
 	return d.pb.IsAllSet()
 }
 
-func newServerDataHandler(blockCount int) *dataHandler {
-	return &dataHandler{
-		bds: make([]blockData, blockCount),
-		pb:  NewProgressBar(blockCount),
-	}
+func newServerDataHandler() *dataHandler {
+	return &dataHandler{}
+}
+
+func (d *dataHandler) initServerDataHandler(blockCount int) {
+	d.bds = make([]blockData, blockCount)
+	d.pb = NewProgressBar(blockCount)
 }
 
 func (d *dataHandler) WriteBlock(bd *blockData) {
+	if !d.initialized {
+		d.initServerDataHandler(bd.Count)
+		d.initialized = true
+	}
+
 	d.bds[bd.Index] = *bd
 	d.pb.Set(bd.Index)
 }
