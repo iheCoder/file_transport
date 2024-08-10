@@ -39,3 +39,11 @@ type blockData struct {
 	Count     int    `json:"count"`
 	BlockSize int    `json:"blockSize"`
 }
+
+type TransportDataType int32
+
+type TransportData struct {
+	Size     int               `json:"size"`
+	Data     []byte            `json:"data"`
+	DataType TransportDataType `json:"dataType"`
+}
