@@ -5,6 +5,7 @@ import (
 )
 
 type blockDataMode int32
+type optionFunc func(*dataHandler)
 
 const (
 	memoryMode blockDataMode = iota
@@ -32,7 +33,13 @@ func newBlockData(raw []byte) (*blockData, error) {
 	return &bd, nil
 }
 
-func newClientMemDataHandler(path string, blockSize int) (*dataHandler, error) {
+func WithProgressBar(pb *progressBar) optionFunc {
+	return func(d *dataHandler) {
+		d.pb = pb
+	}
+}
+
+func newClientMemDataHandler(path string, blockSize int, options ...optionFunc) (*dataHandler, error) {
 	fh, err := NewFileReaderHelper(path, blockSize)
 	if err != nil {
 		return nil, nil
@@ -54,13 +61,22 @@ func newClientMemDataHandler(path string, blockSize int) (*dataHandler, error) {
 		}
 	}
 
-	return &dataHandler{
+	dh := &dataHandler{
 		blockSize: blockSize,
 		bds:       bds,
-		pb:        NewProgressBar(blockCount),
 		mode:      memoryMode,
 		fh:        fh,
-	}, nil
+	}
+
+	for _, opt := range options {
+		opt(dh)
+	}
+
+	if dh.pb == nil {
+		dh.pb = NewProgressBar(blockCount)
+	}
+
+	return dh, nil
 }
 
 func newClientFileDataHandler(path string, blockSize int) (*dataHandler, error) {
