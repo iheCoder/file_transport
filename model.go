@@ -47,3 +47,12 @@ type TransportData struct {
 	Data     []byte            `json:"data"`
 	DataType TransportDataType `json:"dataType"`
 }
+
+type FileInfo struct {
+	Size      int    `json:"size"`
+	Name      string `json:"name"`
+	Key       string `json:"key"`
+	Path      string `json:"path"`
+	Count     int    `json:"count"`
+	BlockSize int    `json:"blockSize"`
+}

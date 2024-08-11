@@ -4,6 +4,7 @@ type transportAdviser struct {
 	bandwidth        float64
 	totalSize        int
 	blockTransportMS int
+	mgr              *dataHandlerManager
 }
 
 var (

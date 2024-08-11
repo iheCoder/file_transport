@@ -46,9 +46,9 @@ func (s *FileTransportServer) handleConn(conn net.Conn) {
 	path := filepath.Join(s.downloadDir, "server_test.txt")
 
 	// 创建数据处理器
-	handler, err := newServerDataHandler(path)
+	handler, err := newUninitServerDataHandler(path)
 	if err != nil {
-		fmt.Println("newServerDataHandler err:", err)
+		fmt.Println("newUninitServerDataHandler err:", err)
 		return
 	}
 

@@ -1,6 +1,6 @@
 package file_tranport
 
-func newServerDataHandler(path string) (*dataHandler, error) {
+func newUninitServerDataHandler(path string) (*dataHandler, error) {
 	fh, err := NewFileWriterHelper(path)
 	if err != nil {
 		return nil, err
@@ -8,6 +8,22 @@ func newServerDataHandler(path string) (*dataHandler, error) {
 
 	return &dataHandler{
 		fh: fh,
+	}, nil
+}
+
+func NewServerDataHandler(path string, count, blockSize int, mode blockDataMode) (*dataHandler, error) {
+	fh, err := NewFileWriterHelper(path)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dataHandler{
+		fh:          fh,
+		bds:         make([]blockData, count),
+		pb:          NewProgressBar(count),
+		blockSize:   blockSize,
+		initialized: true,
+		mode:        mode,
 	}, nil
 }
 
