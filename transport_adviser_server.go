@@ -19,9 +19,19 @@ func (t *transportAdviser) GetServerDataHandler(info *FileInfo) (*dataHandler, e
 	}
 
 	// create new server data handler
+	mode := memoryMode
 	if float64(info.Size)/t.bandwidth > float64(maxTransportSecondsPerBlock) {
-		return NewServerDataHandler(info.Path, info.Count, info.BlockSize, fileMode)
-	} else {
-		return NewServerDataHandler(info.Path, info.Count, info.BlockSize, memoryMode)
+		mode = fileMode
 	}
+
+	// create new server data handler
+	dh, err := NewServerDataHandler(info.Path, info.Count, info.BlockSize, mode)
+	if err != nil {
+		return nil, err
+	}
+
+	// add data handler to manager
+	t.mgr.RegisterDataHandler(info.Key, dh)
+
+	return dh, nil
 }

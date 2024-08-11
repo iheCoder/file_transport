@@ -144,3 +144,7 @@ func (d *dataHandler) SetBlockCompleted(index int) {
 func calculateBlockCount(fileSize, blockSize int) int {
 	return (fileSize + blockSize - 1) / blockSize
 }
+
+func (d *dataHandler) GetProgressBar() *progressBar {
+	return d.pb
+}

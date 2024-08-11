@@ -2,7 +2,6 @@ package file_tranport
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"io"
 	"net"
 	"path/filepath"
@@ -10,6 +9,7 @@ import (
 
 type FileTransportServer struct {
 	downloadDir string
+	adviser     *transportAdviser
 }
 
 func NewFileTransportServer(downloadDir string) *FileTransportServer {
@@ -101,12 +101,4 @@ func (s *FileTransportServer) receiveData(conn net.Conn, handler *dataHandler) e
 	}
 
 	return nil
-}
-
-func (s *FileTransportServer) GetProgressInfo(ctx *gin.Context) {
-
-}
-
-func (s *FileTransportServer) UploadFile(ctx *gin.Context) {
-
 }
